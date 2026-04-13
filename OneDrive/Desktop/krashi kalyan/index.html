@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>कृषि कल्याण | Krishi Kalyan Farmer Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">🌿</div>
+                <h2 class="english-small">KK Farm</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard" title="डैशबोर्ड">डैशबोर्ड</a>
+                <a href="#" class="nav-item" data-section="soil" title="मिट्टी पोषण">मिट्टी पोषण</a>
+                <a href="#" class="nav-item" data-section="weather" title="मौसम">मौसम</a>
+                <a href="#" class="nav-item" data-section="disease" title="रोग जोखिम">रोग जोखिम</a>
+                <a href="#" class="nav-item" data-section="crop" title="फसल चक्र">फसल चक्र</a>
+                <a href="#" class="nav-item" data-section="market" title="बाज़ार भाव">बाज़ार भाव</a>
+                <a href="#" class="nav-item" data-section="storage" title="भंडारण">भंडारण</a>
+                <a href="#" class="nav-item" data-section="water" title="जल स्थिरता">जल स्थिरता</a>
+                <a href="#" class="nav-item" data-section="finance" title="वित्तीय जोखिम">वित्तीय जोखिम</a>
+                <a href="#" class="nav-item" data-section="help" title="सहायता">🤖 सहायता</a>
+                <a href="#" class="nav-item" data-section="history" id="nav-history" title="इतिहास">इतिहास</a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" title="लॉगआउट" id="logout-btn">लॉगआउट</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="page-title">
+                    <h1 id="main-view-title">किसान डैशबोर्ड / <span class="english">FARMER DASHBOARD</span></h1>
+                    <div id="season-badge" class="season-badge">ऋतु / Season: <span id="current-season-text">...</span></div>
+                </div>
+                <div class="header-right">
+                    <div class="info-group">
+                        <div class="info-item" id="weather-info">
+                            <i data-lucide="cloud-sun"></i>
+                            <span>लोड हो रहा है... / Loading</span>
+                        </div>
+                        <div class="info-item" id="location-item">
+                            <i data-lucide="map-pin"></i>
+                            <select id="state-selector" class="state-select">
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="notification-badge">
+                        <i data-lucide="bell"></i>
+                        <span class="badge"></span>
+                    </div>
+                    <div class="user-profile">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=RamSingh" alt="User Profile" class="avatar">
+                        <div class="user-info">
+                            <span class="user-name">राम सिंह / <span class="english-small">RAM SINGH</span></span>
+                        </div>
+                        <i data-lucide="chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard View (All cards overview) -->
+            <div id="section-dashboard" class="section-view active-section">
+                <div class="dashboard-grid">
+                <!-- Soil Nutrients -->
+                <div class="card glass-card soil-card">
+                    <div class="card-header">
+                        <h3>मिट्टी पोषण / <span class="english">MITTI POSHAN</span></h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="chart-container">
+                            <canvas id="soilChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disease Risk -->
+                <div class="card glass-card disease-card">
+                    <div class="card-header">
+                        <h3>रोग जोखिम / <span class="english">ROG JOKHIM</span></h3>
+                    </div>
+                    <div class="card-content disease-alert">
+                        <div class="status-indicator" id="disease-status-indicator">
+                            <i data-lucide="check-circle"></i>
+                        </div>
+                        <div class="alert-text">
+                            <p class="status-msg" id="disease-msg">Risk is <span class="low-text">Low</span> for Blight.</p>
+                            <p class="recommendation" id="disease-recommendation">Monitor fields closely.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crop Rotation -->
+                <div class="card glass-card rotation-card">
+                    <div class="card-header">
+                        <h3>फसल चक्र / <span class="english">PHASAL CHAKRA</span></h3>
+                        <div class="header-actions">
+                            <select id="crop-month-selector" class="state-select">
+                                <option value="1">जनवरी / Jan</option>
+                                <option value="2">फरवरी / Feb</option>
+                                <option value="3">मार्च / Mar</option>
+                                <option value="4">अप्रैल / Apr</option>
+                                <option value="5">मई / May</option>
+                                <option value="6">जून / Jun</option>
+                                <option value="7">जुलाई / Jul</option>
+                                <option value="8">अगस्त / Aug</option>
+                                <option value="9">सितंबर / Sep</option>
+                                <option value="10">अक्टूबर / Oct</option>
+                                <option value="11">नवंबर / Nov</option>
+                                <option value="12">दिसंबर / Dec</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-content rotation-info">
+                        <div class="current-crop">
+                            <div class="crop-icon">🌾</div>
+                            <div class="crop-details">
+                                <span class="crop-name" id="current-crop-display">गेहूँ / <span class="english-small">Wheat</span></span>
+                                <span class="crop-status" id="crop-yield-info">(Mature)</span>
+                            </div>
+                        </div>
+                        <div class="next-suggestion">
+                            <div class="suggestion-tag">Next: <span class="highlight" id="next-crop-name">Pulses</span></div>
+                            <button class="action-btn">प्लान / <span class="english">Plan Next</span></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Crop Guide -->
+                <div class="card glass-card crop-guide-card">
+                    <div class="card-header">
+                        <h3>महीने की फसलें / <span class="english">MONTHLY CROP GUIDE</span></h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="crop-guide-list" class="crop-guide-list">
+                            <p class="loading-text">लोड हो रहा है... / Loading recommendations...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Prices -->
+                <div class="card glass-card market-card">
+                    <div class="card-header">
+                        <h3>बाज़ार भाव / <span class="english">BAZAAR BHAO</span></h3>
+                    </div>
+                    <div class="card-content market-stats">
+                        <div class="price-data">
+                            <div class="data-row">
+                                <span class="label">मूल्य / <span class="english-small">Price</span></span>
+                                <span class="value" id="market-price-val">₹2200/qtl</span>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="data-row">
+                                <span class="label">लागत / <span class="english-small">Cost</span></span>
+                                <span class="value" id="market-cost-val">₹1800/qtl</span>
+                            </div>
+                        </div>
+                        <div class="margin-indicator positive" id="market-margin-indicator">
+                            <i data-lucide="trending-up"></i>
+                            <span class="margin-text" id="market-margin-text">Good Margin</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Water Sustainability -->
+                <div class="card glass-card water-card">
+                    <div class="card-header">
+                        <h3>जल स्थिरता / <span class="english">WATER SUSTAINABILITY</span></h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="water-gauge">
+                            <div class="gauge-level" id="water-gauge-level" style="width: 75%;"></div>
+                            <span class="percentage" id="water-percentage">75%</span>
+                        </div>
+                        <p class="gauge-label">Water Usage Optimization</p>
+                    </div>
+                </div>
+
+                <!-- Storage Optimization -->
+                <div class="card glass-card storage-card">
+                    <div class="card-header">
+                        <h3>भंडारण / <span class="english">STORAGE</span></h3>
+                    </div>
+                    <div class="card-content storage-status">
+                        <div class="storage-item">
+                            <span class="label">कैपेसिटी / <span class="english-small">Capacity</span></span>
+                            <div class="progress-bar">
+                                <div class="progress" id="storage-progress" style="width: 85%;"></div>
+                            </div>
+                            <span class="value" id="storage-value">85% Full</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Risk -->
+                <div class="card glass-card finance-card">
+                    <div class="card-header">
+                        <h3>वित्तीय जोखिम / <span class="english">FINANCIAL RISK</span></h3>
+                    </div>
+                    <div class="card-content">
+                         <div class="risk-score green" id="finance-risk-score">
+                             <span class="score" id="credit-score">S+</span>
+                             <span class="label">Credit Score</span>
+                         </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Individual Section Views (shown when sidebar clicked) -->
+            <div id="section-soil" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card" style="grid-column: span 1;">
+                        <div class="card-header"><h3>मिट्टी पोषण / <span class="english">SOIL ANALYSIS</span></h3></div>
+                        <div class="card-content"><div class="chart-container" style="height:350px;"><canvas id="soilChartFull"></canvas></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-disease" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card">
+                        <div class="card-header"><h3>रोग जोखिम / <span class="english">DISEASE RISK ANALYSIS</span></h3></div>
+                        <div class="card-content disease-alert" id="disease-section-content">
+                            <div class="status-indicator" id="disease-full-indicator"><i data-lucide="check-circle"></i></div>
+                            <div class="alert-text">
+                                <p class="status-msg" id="disease-full-msg">Loading...</p>
+                                <p class="recommendation" id="disease-full-rec">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card glass-card upload-card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <h3>रोग विश्लेषण (फोटो) / <span class="english">ILLNESS DETECTION (PHOTO)</span></h3>
+                        </div>
+                        <div class="card-content">
+                            <input type="file" id="disease-img-upload" accept="image/*" class="file-input">
+                            <button id="analyze-disease-btn" class="action-btn" style="margin-top:10px;">बीमारी पहचानें / Analyze Crop</button>
+                            <div id="disease-analysis-result" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--glass-border); min-height: 50px; font-size: 14px;">
+                                फोटो अपलोड करें और परिणाम यहाँ देखें...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-crop" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card">
+                        <div class="card-header"><h3>फसल चक्र / <span class="english">CROP ROTATION & GUIDE</span></h3></div>
+                        <div class="card-content rotation-info" id="crop-full-rotation"></div>
+                    </div>
+                    <div class="card glass-card" style="margin-top:20px;">
+                        <div class="card-header"><h3>महीने की फसलें / <span class="english">MONTHLY CROP GUIDE</span></h3></div>
+                        <div class="card-content"><div id="crop-guide-full" class="crop-guide-list"></div></div>
+                    </div>
+                    <div class="card glass-card upload-card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <h3>फसल समस्या (फोटो) / <span class="english">CROP ISSUE DETECTION</span></h3>
+                        </div>
+                        <div class="card-content">
+                            <input type="file" id="crop-img-upload" accept="image/*" class="file-input">
+                            <button id="analyze-crop-btn" class="action-btn" style="margin-top:10px;">समस्या पहचानें / Analyze Issue</button>
+                            <div id="crop-analysis-result" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--glass-border); min-height: 50px; font-size: 14px;">
+                                फोटो अपलोड करें और परिणाम यहाँ देखें...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-market" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card">
+                        <div class="card-header"><h3>बाज़ार भाव / <span class="english">MARKET ANALYSIS</span></h3></div>
+                        <div class="card-content market-stats" id="market-full-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-storage" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card">
+                        <div class="card-header"><h3>भंडारण / <span class="english">STORAGE STATUS</span></h3></div>
+                        <div class="card-content storage-status" id="storage-full-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-water" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card">
+                        <div class="card-header"><h3>जल स्थिरता / <span class="english">WATER SUSTAINABILITY</span></h3></div>
+                        <div class="card-content" id="water-full-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-finance" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card">
+                        <div class="card-header"><h3>वित्तीय जोखिम / <span class="english">FINANCIAL OVERVIEW</span></h3></div>
+                        <div class="card-content" id="finance-full-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Section -->
+            <div id="section-weather" class="section-view hidden">
+                <div class="section-full">
+                    <div class="card glass-card weather-dashboard">
+                        <div class="card-header"><h3>मौसम चार्ट / <span class="english">WEATHER ANALYSIS</span></h3></div>
+                        <div class="card-content weather-content">
+                            <h2 id="weather-city-name" style="margin-bottom:10px;">लोड हो रहा है...</h2>
+                            <div class="weather-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                <div class="weather-box" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center;">
+                                    <h4 style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">तापमान / Temperature</h4>
+                                    <div id="weather-temp-main" style="font-size: 36px; font-weight: bold; color: var(--primary-light);">...</div>
+                                    <div id="weather-desc" style="font-size: 14px; margin-top: 5px;">...</div>
+                                </div>
+                                <div class="weather-box" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center;">
+                                    <h4 style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">आर्द्रता / Humidity</h4>
+                                    <div id="weather-humidity" style="font-size: 36px; font-weight: bold; color: #3b82f6;">...</div>
+                                </div>
+                                <div class="weather-box" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center;">
+                                    <h4 style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">हवा की गति / Wind</h4>
+                                    <div id="weather-wind" style="font-size: 36px; font-weight: bold; color: #f59e0b;">...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Help / Chatbot Section -->
+            <div id="section-help" class="section-view hidden">
+                <div class="chat-container">
+                    <div class="card glass-card chat-card">
+                        <div class="card-header chat-header">
+                            <div class="chat-bot-info">
+                                <div class="chat-bot-avatar">🤖</div>
+                                <div>
+                                    <h3>कृषि कल्याण सहायक / <span class="english">AI HELP</span></h3>
+                                    <span class="chat-status">● ऑनलाइन / Online</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-msg bot">
+                                <div class="msg-avatar">🤖</div>
+                                <div class="msg-bubble">
+                                    <p>नमस्ते किसान भाई! 🙏🌾</p>
+                                    <p>मैं <strong>कृषि कल्याण सहायक</strong> हूँ। आपकी खेती से जुड़ी किसी भी समस्या में मदद कर सकता हूँ।</p>
+                                    <p class="english-small">(Hello farmer! I am Krishi Kalyan Sahayak. I can help with any farming problems.)</p>
+                                    <p style="margin-top:8px;">आप पूछ सकते हैं:</p>
+                                    <ul style="margin-left:16px; margin-top:4px; color: var(--text-muted); font-size:13px;">
+                                        <li>फसल की बीमारी कैसे पहचानें?</li>
+                                        <li>मिट्टी की सेहत कैसे सुधारें?</li>
+                                        <li>PM Kisan योजना की जानकारी</li>
+                                        <li>सिंचाई के बेहतर तरीके</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="अपना सवाल पूछें... / Ask your question..." autocomplete="off">
+                            <button id="chat-send-btn" class="chat-send">
+                                <i data-lucide="send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="history-view" class="hidden">
+                <div class="view-header">
+                    <h2>इतिहास / <span class="english">HISTORY</span></h2>
+                    <button class="clear-btn" id="clear-history">
+                        <i data-lucide="trash-2"></i>
+                        साफ करें / <span class="english">Clear All</span>
+                    </button>
+                </div>
+                <div class="card glass-card history-container">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>दिनांक / <span class="english-small">Date</span></th>
+                                <th>प्रकार / <span class="english-small">Type</span></th>
+                                <th>विवरण / <span class="english-small">Details</span></th>
+                                <th>स्थिति / <span class="english-small">Status</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-list">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Auth Modals -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div id="login-form">
+                <h2 class="modal-title">लॉग इन / <span class="english">LOGIN</span></h2>
+                <div class="input-group">
+                    <label>मोबाइल नंबर / Mobile Number</label>
+                    <input type="text" id="login-phone" placeholder="9876X XXXXX">
+                </div>
+                <div class="input-group">
+                    <label>पासवर्ड / Password</label>
+                    <input type="password" id="login-pass" placeholder="••••••••">
+                </div>
+                <button class="auth-btn primary" id="do-login">लॉग इन करें / Login</button>
+                <p class="auth-switch">खाता नहीं है? <span id="to-register">रजिस्टर करें</span></p>
+            </div>
+
+            <div id="register-form" class="hidden">
+                <h2 class="modal-title">रजिस्टर / <span class="english">REGISTER</span></h2>
+                <div class="input-group">
+                    <label>नाम / Full Name</label>
+                    <input type="text" id="reg-name" placeholder="राम सिंह">
+                </div>
+                <div class="input-group">
+                    <label>मोबाइल नंबर / Mobile Number</label>
+                    <input type="text" id="reg-phone" placeholder="9876X XXXXX">
+                </div>
+                <div class="input-group">
+                    <label>पासवर्ड / Password</label>
+                    <input type="password" id="reg-pass" placeholder="••••••••">
+                </div>
+                <button class="auth-btn primary" id="do-register">रजिस्टर करें / Register</button>
+                <p class="auth-switch">पहले से खाता है? <span id="to-login">लॉग इन करें</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script src="script.js"></script>
+</body>
+</html>
