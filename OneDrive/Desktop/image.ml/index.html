@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Detector | AI Vision</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="glitch" data-text="CAT DETECTOR">CAT DETECTOR</h1>
+            <p class="subtitle">Advanced AI for Feline Identification</p>
+        </header>
+
+        <main>
+            <div class="card glass">
+                <div class="tabs">
+                    <button id="tab-upload" class="tab-btn active">Upload Image</button>
+                    <button id="tab-camera" class="tab-btn">Use Camera</button>
+                </div>
+
+                <div class="tab-content" id="content-upload">
+                    <div class="upload-area" id="drop-zone">
+                        <input type="file" id="file-input" hidden accept="image/*">
+                        <div class="upload-icon">📁</div>
+                        <p>Drag & Drop or Click to Upload</p>
+                        <small>Supports: JPG, PNG, WEBP</small>
+                    </div>
+                </div>
+
+                <div class="tab-content hidden" id="content-camera">
+                    <div class="camera-container">
+                        <video id="webcam" autoplay playsinline></video>
+                        <canvas id="canvas" hidden></canvas>
+                        <div class="scan-line"></div>
+                    </div>
+                    <button id="capture-btn" class="btn pulse">Capture Image</button>
+                </div>
+
+                <div id="preview-container" class="hidden">
+                    <h3>Preview</h3>
+                    <img id="image-preview" src="" alt="Preview">
+                    <button id="predict-btn" class="btn primary">Detect Cat</button>
+                </div>
+
+                <div id="result-container" class="hidden">
+                    <div class="result-card">
+                        <div id="result-label">DETECTING...</div>
+                        <div class="confidence-bar">
+                            <div id="confidence-fill" style="width: 0%"></div>
+                        </div>
+                        <div id="result-confidence">0% Confidence</div>
+                    </div>
+                    <button id="reset-btn" class="btn secondary">Try Again</button>
+                </div>
+
+                <div id="loader" class="hidden">
+                    <div class="spinner"></div>
+                    <p>Analyzing pixels...</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 AI Vision Systems | Powered by TensorFlow</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
