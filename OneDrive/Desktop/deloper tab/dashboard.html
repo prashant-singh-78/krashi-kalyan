@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | StreamPremium</title>
+    <link rel="stylesheet" href="css/index.css">
+    <style>
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .sidebar { width: 280px; background: var(--bg-sec); border-right: 1px solid var(--border); padding: 2rem; position: sticky; top: 70px; height: calc(100vh - 70px); }
+        .main-content { flex: 1; padding: 3rem 5%; }
+        
+        .tab-btn { display: block; width: 100%; padding: 1rem; text-align: left; background: transparent; border: none; color: var(--text-muted); font-weight: 600; cursor: pointer; border-radius: 0.75rem; margin-bottom: 0.5rem; transition: all 0.3s; }
+        .tab-btn.active { background: var(--primary-light); color: var(--primary); }
+        .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.05); }
+
+        .content-tab { display: none; animation: fadeIn 0.5s ease; }
+        .content-tab.active { display: block; }
+
+        .video-card { background: var(--bg-sec); border: 1px solid var(--border); border-radius: 1.25rem; transition: all 0.4s; overflow: hidden; position: relative; cursor: pointer; }
+        .video-card:hover { transform: translateY(-8px); border-color: var(--primary); box-shadow: var(--shadow-lg); }
+        .video-thumb-container { position: relative; aspect-ratio: 16/9; overflow: hidden; }
+        .video-thumb { width:100%; height:100%; object-fit: cover; transition: transform 0.5s; }
+        .video-card:hover .video-thumb { transform: scale(1.05); }
+
+        .premium-badge { position: absolute; top: 1rem; left: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; padding: 0.4rem 0.8rem; border-radius: 0.75rem; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; z-index: 10; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); }
+        .lock-overlay { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.3s; }
+        .video-card:hover .lock-overlay { opacity: 1; }
+
+        /* Modal Player refined */
+        .player-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 2rem; }
+        .player-wrapper { width: 100%; max-width: 1100px; background: #0f172a; border-radius: 2rem; overflow: hidden; border: 1px solid var(--border); }
+        .close-btn { position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); color: #fff; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); }
+
+        input, textarea, select { font-family: 'Outfit', sans-serif !important; }
+    </style>
+</head>
+<body style="background: var(--bg-main);">
+    <nav>
+        <a href="index.html" class="logo">STREAMPREMIUM</a>
+        <div class="nav-links">
+            <span id="user-display" style="font-weight: 600; color: var(--primary);"></span>
+            <button class="btn btn-outline" style="padding: 0.5rem 1.25rem;" onclick="api.logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h4 style="margin-bottom: 2rem; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.1em;">Menu</h4>
+            <button class="tab-btn active" onclick="showTab('library-tab')">📚 My Courses</button>
+            <div id="admin-only-sidebar" style="display: none;">
+                <h4 style="margin: 2rem 0 1rem; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.1em;">Instructor Panel</h4>
+                <button class="tab-btn" onclick="showTab('upload-tab')">📤 Upload Video</button>
+                <button class="tab-btn" onclick="showTab('members-tab')">👥 Add Members</button>
+                <button class="tab-btn" onclick="showTab('settings-tab')">⚙️ Settings</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Library Tab -->
+            <div id="library-tab" class="content-tab active">
+                <div style="margin-bottom: 3rem;">
+                    <h1 style="font-size: 2.5rem; font-weight: 800;">Academic Library</h1>
+                    <p style="color: var(--text-muted);">Continue your skill-up journey where you left off.</p>
+                </div>
+                <div id="video-grid" class="video-grid" style="padding: 1rem 0;">
+                    <!-- Videos load here -->
+                </div>
+            </div>
+
+            <!-- Upload Tab -->
+            <div id="upload-tab" class="content-tab">
+                <h2 style="margin-bottom: 2rem;">Upload New Content</h2>
+                <div class="auth-card" style="max-width: 100%;">
+                    <form id="upload-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="form-group"><label>Course Title</label><input type="text" id="v-title" required></div>
+                        <div class="form-group"><label>MP4 Link (Direct)</label><input type="url" id="v-url" required></div>
+                        <div class="form-group"><label>Thumbnail Link</label><input type="url" id="v-thumb" required></div>
+                        <div class="form-group"><label>Duration</label><input type="text" id="v-duration" value="10:00"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Description</label><textarea id="v-desc" rows="3"></textarea></div>
+                        <button type="submit" class="btn btn-primary" style="grid-column: span 2;">Confirm Upload</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Members Tab -->
+            <div id="members-tab" class="content-tab">
+                <h2 style="margin-bottom: 2rem;">Manually Add Students</h2>
+                <div class="auth-card" style="max-width: 600px;">
+                    <form id="member-form">
+                        <div class="form-group"><label>Email Address</label><input type="email" id="m-email" required></div>
+                        <div class="form-group"><label>Set Password</label><input type="text" id="m-pass" value="password123" required></div>
+                        <div class="form-group"><label>Access Level</label>
+                            <select id="m-role">
+                                <option value="user">Student (Subscribed)</option>
+                                <option value="admin">Instructor (Admin)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Add to Platform</button>
+                    </form>
+                    <p id="m-msg" style="margin-top: 1rem; text-align: center; color: #22c55e;"></p>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="content-tab">
+                <h2 style="margin-bottom: 2rem;">Platform Settings</h2>
+                <div class="auth-card" style="max-width: 500px;">
+                    <div class="form-group">
+                        <label>Global Subscription Price (₹)</label>
+                        <input type="number" id="p-price" placeholder="e.g. 500">
+                    </div>
+                    <button onclick="updateSettings()" class="btn btn-primary" style="width: 100%;">Save Global Price</button>
+                    <p id="p-msg" style="margin-top: 1rem; text-align: center; color: #22c55e;"></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="player-modal" class="player-overlay">
+        <button class="close-btn" onclick="closePlayer()">&times;</button>
+        <div class="player-wrapper">
+            <video id="player" controls autoplay playsinline style="width: 100%; aspect-ratio: 16/9;"></video>
+            <div class="video-meta" style="padding: 2.5rem; background: var(--bg-sec);">
+                <h2 id="playing-title" style="font-weight: 800; font-size: 2rem; margin-bottom: 0.5rem;"></h2>
+                <p id="playing-desc" style="color: var(--text-muted); font-size: 1.1rem; max-width: 800px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        const user = api.getUser();
+        if(!user) window.location.href = 'login.html';
+        // Subscription check handled per-video now
+
+        document.getElementById('user-display').innerText = user.email;
+        if(user.role === 'admin') document.getElementById('admin-only-sidebar').style.display = 'block';
+
+        function showTab(tabId) {
+            document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if (event && event.currentTarget) event.currentTarget.classList.add('active');
+        }
+
+        async function loadVideos() {
+            try {
+                const videos = await api.getVideos();
+                const grid = document.getElementById('video-grid');
+                grid.innerHTML = (videos.length === 0) ? '<p style="color: var(--text-muted);">No videos uploaded yet.</p>' : '';
+                
+                videos.forEach(v => {
+                    const isLocked = v.isPremium;
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    card.onclick = () => openPlayer(v);
+                    card.innerHTML = `
+                        ${isLocked ? '<div class="premium-badge">✨ Premium</div>' : ''}
+                        <div class="video-thumb-container">
+                            <img src="${v.thumbnailUrl}" class="video-thumb">
+                            ${isLocked ? '<div class="lock-overlay"><svg style="width:40px;height:40px;color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg></div>' : ''}
+                            <div style="position: absolute; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); padding: 0.3rem 0.6rem; border-radius: 0.5rem; color: #fff; font-size: 0.8rem; font-weight: 700;">${v.duration}</div>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <h3 style="margin-bottom: 0.5rem; font-weight: 700; color: ${isLocked ? 'var(--text-muted)' : '#fff'};">${v.title}</h3>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${v.description}</p>
+                            ${isLocked ? '<div style="margin-top:1rem; font-size:0.8rem; font-weight:700; color:var(--primary);">Enroll to Unlock</div>' : ''}
+                        </div>`;
+                    grid.appendChild(card);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        function openPlayer(v) {
+            if (v.isPremium) {
+                alert("This is a Premium lesson. Please subscribe for full access!");
+                window.location.href = 'subscription.html';
+                return;
+            }
+            document.getElementById('playing-title').innerText = v.title;
+            document.getElementById('playing-desc').innerText = v.description;
+            document.getElementById('player').src = v.videoUrl;
+            document.getElementById('player-modal').style.display = 'flex';
+        }
+
+        function closePlayer() {
+            document.getElementById('player').pause();
+            document.getElementById('player-modal').style.display = 'none';
+        }
+
+        document.getElementById('upload-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                title: document.getElementById('v-title').value,
+                description: document.getElementById('v-desc').value,
+                videoUrl: document.getElementById('v-url').value,
+                thumbnailUrl: document.getElementById('v-thumb').value,
+                duration: document.getElementById('v-duration').value
+            };
+            await api.uploadVideo(data);
+            alert('Video Uploaded Successfully!');
+            e.target.reset();
+            loadVideos();
+        };
+
+        document.getElementById('member-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                email: document.getElementById('m-email').value,
+                password: document.getElementById('m-pass').value,
+                role: document.getElementById('m-role').value
+            };
+            const res = await api.addMember(data);
+            document.getElementById('m-msg').innerText = res.message;
+            e.target.reset();
+        };
+
+        async function updateSettings() {
+            const price = document.getElementById('p-price').value;
+            const res = await api.updatePrice(price);
+            document.getElementById('p-msg').innerText = res.message;
+        }
+
+        async function loadInit() {
+            const settings = await api.getSettings();
+            document.getElementById('p-price').value = settings.price;
+            loadVideos();
+        }
+
+        loadInit();
+    </script>
+</body>
+</html>

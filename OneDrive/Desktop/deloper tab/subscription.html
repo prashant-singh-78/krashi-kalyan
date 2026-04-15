@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription | Premium Video Access</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">STREAMPREMIUM</div>
+        <div id="nav-actions">
+            <button class="btn btn-secondary" onclick="api.logout()">Logout</button>
+        </div>
+    </nav>
+    <div class="sub-wrapper">
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        
+        <div class="sub-header">
+            <h1>Elevate Your Experience</h1>
+            <p>Unlock our entire library of exclusive 4K content and premium features today.</p>
+        </div>
+
+        <div class="pricing-card-premium">
+            <span class="plan-badge">Most Popular</span>
+            <div class="plan-name" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Premium Plan</div>
+            <div class="price-box">
+                <span class="amount">₹<span id="display-price">500</span></span>
+                <span class="period">/ Lifetime Access</span>
+            </div>
+            
+            <div class="features-list-premium">
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Unlimited 4K Ultra HD playback</span>
+                </div>
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Completely Ad-free Experience</span>
+                </div>
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Offline Viewing Support</span>
+                </div>
+                <div class="feature-item">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Priority Support & Early Access</span>
+                </div>
+            </div>
+
+            <button id="subscribe-btn" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 1.1rem; border-radius: 1.25rem;">Subscribe Now</button>
+            <div id="message" style="margin-top: 1.5rem; text-align: center; font-size: 0.95rem; font-weight: 500;"></div>
+        </div>
+    </div>
+    <script src="js/api.js"></script>
+    <script>
+        // Check if user is already subscribed
+        const user = api.getUser();
+        if (!user) window.location.href = 'login.html';
+        
+        if (user.isSubscribed) {
+            window.location.href = 'dashboard.html';
+        }
+
+        const subBtn = document.getElementById('subscribe-btn');
+
+        async function init() {
+            try {
+                const settings = await api.getSettings();
+                document.getElementById('display-price').innerText = settings.price;
+            } catch (err) {
+                console.error("Failed to load settings:", err);
+            }
+        }
+        init();
+
+        subBtn.onclick = async () => {
+            const btn = document.getElementById('subscribe-btn');
+            const messageDiv = document.getElementById('message');
+            
+            try {
+                btn.disabled = true;
+                btn.innerText = 'Processing...';
+                
+                const response = await api.subscribe();
+                messageDiv.style.color = 'var(--success)';
+                messageDiv.innerText = 'Subscription Successful! Redirecting...';
+                
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = 'Subscribe Now';
+                messageDiv.style.color = 'var(--danger)';
+                messageDiv.innerText = err.message || 'Subscription failed.';
+            }
+        };
+    </script>
+</body>
+</html>
